@@ -299,5 +299,11 @@ def ajustar_pilula(janela):
 
 
 def identidade_app():
-    """Identidade própria na barra de tarefas (senão aparece o ícone do Python)."""
+    """Rodando pelo Python: identidade própria na barra de tarefas (senão aparece o ícone do Python).
+
+    No Papory.exe instalado não liga: o .exe já é o próprio Papory, com o papagaio gravado dentro, e uma identidade
+    explícita sem atalho que a declare faz o Windows mostrar o ícone genérico de programa.
+    """
+    if getattr(sys, "frozen", False):
+        return
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Papory.Ditado")
