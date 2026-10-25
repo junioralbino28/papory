@@ -115,6 +115,8 @@ class Gravador:
         # o 1º som de verdade chegou: fone Bluetooth no modo música leva ~1,5 s para ligar o microfone
         # (medido no Buds2 Pro), e o que se fala antes disso não chega
         self.ouviu = threading.Event()
+        self.demorou_s = 0.0  # do abrir até o 1º som: perto de 0 num microfone com fio, 0,7 a 1,4 s no Buds
+        self._t0 = 0.0
 
     def _preparar(self):
         """Acha o microfone pelo nome: o número dele muda quando a lista de aparelhos é relida."""
@@ -132,12 +134,14 @@ class Gravador:
             self._blocos.append(dados[:, 0].copy())
         self.nivel = float(np.sqrt(np.mean(dados[:, 0] ** 2))) if len(dados) else 0.0
         if self.nivel > 0 and not self.ouviu.is_set():
+            self.demorou_s = time.perf_counter() - self._t0
             self.ouviu.set()
 
     def iniciar(self):
         global _abertos
-        t0 = time.perf_counter()
+        t0 = self._t0 = time.perf_counter()
         self._blocos = []
+        self.demorou_s = 0.0
         self.ouviu.clear()
         with _trava:  # espera uma releitura da lista que esteja no meio (no máximo uns 200 ms)
             self._preparar()
@@ -147,10 +151,16 @@ class Gravador:
             _abertos += 1
         self.abriu_em_s = time.perf_counter() - t0
 
-    def parar(self):
+    def parar(self, depois_s=0.0):
+        """depois_s: segura o microfone aberto mais um pouco, sem guardar esse pedaço. Fone Bluetooth troca do modo
+        ligação para o de música quando o microfone fecha, e o som que estiver tocando nessa troca some."""
         global _abertos
         if self._fluxo is None:
             return np.zeros(0, dtype=np.float32), self.taxa
+        with self._trava:
+            ate = sum(len(b) for b in self._blocos)
+        if depois_s:
+            time.sleep(depois_s)
         self._fluxo.stop()
         self._fluxo.close()
         self._fluxo = None
@@ -158,7 +168,7 @@ class Gravador:
             _abertos -= 1
         self.nivel = 0.0
         with self._trava:
-            audio = np.concatenate(self._blocos) if self._blocos else np.zeros(0, dtype=np.float32)
+            audio = np.concatenate(self._blocos)[:ate] if self._blocos else np.zeros(0, dtype=np.float32)
         return audio, self.taxa
 
 
@@ -174,9 +184,10 @@ class GravadorDeArquivo:
         self.nivel = 0.0
         self.ouviu = threading.Event()
         self.ouviu.set()
+        self.demorou_s = 0.0
 
     def iniciar(self):
         pass
 
-    def parar(self):
+    def parar(self, depois_s=0.0):
         return self.audio.copy(), self.taxa

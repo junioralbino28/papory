@@ -26,6 +26,8 @@ from .teclado import Atalho
 
 som = plataforma.tocar_som
 ESPERA_MICROFONE_S = 3.0  # sem som nenhum do microfone nesse tempo, o assobio de começo toca assim mesmo
+MICROFONE_LENTO_S = 0.3   # demorou mais que isso para dar o 1º som: é fone Bluetooth (o Buds leva 0,7 a 1,4 s)...
+SEGURA_NO_FIM_S = 0.4     # ...e o microfone fica aberto esse tempo depois de soltar, para o assobio de fim não sumir
 
 
 def aplicar_substituicoes(texto, cfg, processo):
@@ -217,10 +219,12 @@ class Motor:
                                      daemon=True).start()
                 self.avisar("ouvindo", ctx["processo"])
             elif ev == "soltou" and estado:
-                audio, taxa = self.gravador.parar()
                 self.gravando = False
+                segura = 0.0
                 if self.cfg["sons"]:
-                    som("terminou")
+                    som("terminou")  # antes de fechar: fone Bluetooth troca de modo ao fechar e engole o som
+                    segura = SEGURA_NO_FIM_S if self.gravador.demorou_s > MICROFONE_LENTO_S else 0.0
+                audio, taxa = self.gravador.parar(depois_s=segura)
                 self._trabalhos.put((audio, taxa, estado["contexto"], time.perf_counter()))
                 self.avisar("escrevendo", None)
                 estado = {}
