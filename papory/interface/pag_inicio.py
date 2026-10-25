@@ -5,7 +5,7 @@ from PySide6.QtCore import QSize, Qt, QTimer
 from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QHBoxLayout, QLineEdit, QPlainTextEdit, QVBoxLayout,
                                QWidget)
 
-from .. import aprendizado, contexto, historico
+from .. import aprendizado, audio, contexto, historico
 from . import tema
 from .widgets import (botao, botao_icone, cartao, icone, limpar_layout, linha, linha_h, pagina_rolavel, rotulo,
                       teclas)
@@ -104,16 +104,15 @@ class ItemHistorico(QFrame):
                                          self.b_copiar.setToolTip("Copiar")))
 
     def _ouvir(self):
-        import sounddevice as sd
         import soundfile as sf
         if _Tocador.atual is self:
-            sd.stop()
+            audio.parar_som()
             self._fim_audio()
             return
         if _Tocador.atual is not None:
             _Tocador.atual._fim_audio()
         dados, taxa = sf.read(str(self.r["_audio"]), dtype="float32")
-        sd.play(dados, taxa)
+        audio.tocar(dados, taxa)
         _Tocador.atual = self
         self.b_ouvir.setIcon(icone("parar", "#3D4935", 19))
         self.b_ouvir.setToolTip("Parar")

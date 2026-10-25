@@ -11,8 +11,65 @@ import sounddevice as sd
 import soundfile as sf
 
 
+# O PortAudio lê a lista de aparelhos uma vez só, quando o programa abre: um fone Bluetooth ligado depois não
+# aparecia, e o "padrão do sistema" ficava o da abertura. atualizar_aparelhos() relê a lista, mas nunca com um
+# microfone aberto ou um som tocando (reler fecha tudo o que o PortAudio tem aberto).
+_trava = threading.Lock()
+_abertos = 0
+_relida_em = 0.0
+
+
+def _tocando():
+    try:
+        return sd.get_stream().active
+    except RuntimeError:  # nada tocado ainda
+        return False
+
+
+def atualizar_aparelhos(minimo_s=2.0):
+    """Relê a lista de microfones do sistema (leva de 25 a 200 ms). Devolve False se não deu para reler agora."""
+    global _relida_em
+    with _trava:
+        if _abertos or _tocando() or time.monotonic() - _relida_em < minimo_s:
+            return False
+        sd._terminate()
+        sd._initialize()
+        _relida_em = time.monotonic()
+        return True
+
+
+def abrir_medidor(nome, callback):
+    """Microfone aberto só para medir o volume (botão Testar). Fechar com fechar_medidor()."""
+    global _abertos
+    with _trava:
+        fluxo = sd.InputStream(device=escolher_dispositivo(nome), channels=1, dtype="float32", callback=callback)
+        fluxo.start()
+        _abertos += 1
+    return fluxo
+
+
+def fechar_medidor(fluxo):
+    global _abertos
+    fluxo.stop()
+    fluxo.close()
+    with _trava:
+        _abertos -= 1
+
+
+def tocar(dados, taxa):
+    """Toca um áudio (ouvir um ditado do histórico) sem cruzar com uma releitura da lista."""
+    with _trava:
+        sd.play(dados, taxa)
+
+
+def parar_som():
+    with _trava:
+        sd.stop()
+
+
 def listar_microfones():
     """Nomes dos microfones do sistema, sem repetir (o Windows lista o mesmo aparelho em várias APIs de áudio)."""
+    atualizar_aparelhos()
     padrao_api = sd.default.hostapi
     nomes = []
     for d in sd.query_devices():
@@ -22,6 +79,7 @@ def listar_microfones():
 
 
 def microfone_padrao():
+    atualizar_aparelhos()
     try:
         return sd.query_devices(None, "input")["name"]
     except Exception:  # noqa: BLE001 — nenhum microfone ligado
@@ -39,7 +97,15 @@ def escolher_dispositivo(nome):
 
 class Gravador:
     def __init__(self, nome_microfone=None):
-        self.dispositivo = escolher_dispositivo(nome_microfone)
+        self.nome_microfone = nome_microfone
+        self._preparar()  # já na criação: ValueError se o microfone escolhido não está ligado
+        self._blocos, self._fluxo, self._trava = [], None, threading.Lock()
+        self.abriu_em_s = 0.0
+        self.nivel = 0.0  # volume do último bloco (RMS), para as barras da pílula
+
+    def _preparar(self):
+        """Acha o microfone pelo nome: o número dele muda quando a lista de aparelhos é relida."""
+        self.dispositivo = escolher_dispositivo(self.nome_microfone)
         info = sd.query_devices(self.dispositivo, "input")
         self.taxa = 16000
         try:
@@ -47,9 +113,6 @@ class Gravador:
         except Exception:  # noqa: BLE001 — dispositivo que não aceita 16 kHz grava na taxa dele
             self.taxa = int(info["default_samplerate"])
         self.nome = info["name"]
-        self._blocos, self._fluxo, self._trava = [], None, threading.Lock()
-        self.abriu_em_s = 0.0
-        self.nivel = 0.0  # volume do último bloco (RMS), para as barras da pílula
 
     def _cb(self, dados, quadros, tempo, status):
         with self._trava:
@@ -57,19 +120,26 @@ class Gravador:
         self.nivel = float(np.sqrt(np.mean(dados[:, 0] ** 2))) if len(dados) else 0.0
 
     def iniciar(self):
+        global _abertos
         t0 = time.perf_counter()
         self._blocos = []
-        self._fluxo = sd.InputStream(device=self.dispositivo, samplerate=self.taxa, channels=1,
-                                     dtype="float32", callback=self._cb, blocksize=0, latency="low")
-        self._fluxo.start()
+        with _trava:  # espera uma releitura da lista que esteja no meio (no máximo uns 200 ms)
+            self._preparar()
+            self._fluxo = sd.InputStream(device=self.dispositivo, samplerate=self.taxa, channels=1,
+                                         dtype="float32", callback=self._cb, blocksize=0, latency="low")
+            self._fluxo.start()
+            _abertos += 1
         self.abriu_em_s = time.perf_counter() - t0
 
     def parar(self):
+        global _abertos
         if self._fluxo is None:
             return np.zeros(0, dtype=np.float32), self.taxa
         self._fluxo.stop()
         self._fluxo.close()
         self._fluxo = None
+        with _trava:
+            _abertos -= 1
         self.nivel = 0.0
         with self._trava:
             audio = np.concatenate(self._blocos) if self._blocos else np.zeros(0, dtype=np.float32)

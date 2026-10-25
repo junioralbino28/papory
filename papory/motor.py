@@ -18,7 +18,7 @@ import traceback
 
 from . import colar, config, contexto, historico, plataforma
 from .asr import Reconhecedor
-from .audio import Gravador, GravadorDeArquivo
+from .audio import Gravador, GravadorDeArquivo, atualizar_aparelhos
 from .polimento import Polidor
 from .segunda_opiniao import SegundaOpiniao
 from .teclado import Atalho
@@ -98,6 +98,7 @@ class Motor:
     def _novo_gravador(self):
         if self.arquivo_teste:
             return GravadorDeArquivo(self.arquivo_teste)
+        atualizar_aparelhos(minimo_s=0)  # um fone pode ter sido ligado depois que o Papory abriu
         try:
             return Gravador(self.cfg["microfone"])
         except ValueError:  # o microfone escolhido não está ligado: usa o padrão do sistema
@@ -219,6 +220,8 @@ class Motor:
                 self._trabalhos.put((audio, taxa, estado["contexto"], time.perf_counter()))
                 self.avisar("escrevendo", None)
                 estado = {}
+                if not self.arquivo_teste:  # relê a lista enquanto o texto é escrito: o próximo ditado já vê fone novo
+                    threading.Thread(target=atualizar_aparelhos, daemon=True).start()
 
     def _trabalho(self):
         while True:

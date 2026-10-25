@@ -499,20 +499,17 @@ class PaginaConfig:
         self._salvar()
 
     def _testar_mic(self):
-        import sounddevice as sd
         if self.teste is not None or self.janela.motor.gravando:
             return
         nome = self.mic.currentData()
         try:
-            disp = audio.escolher_dispositivo(nome)
             self.nivel_teste = 0.0
 
             def cb(dados, *_):
                 import numpy as np
                 self.nivel_teste = float(np.sqrt(np.mean(dados[:, 0] ** 2)))
 
-            self.teste = sd.InputStream(device=disp, channels=1, dtype="float32", callback=cb)
-            self.teste.start()
+            self.teste = audio.abrir_medidor(nome, cb)
         except Exception:  # noqa: BLE001
             self.b_testar.setText("Microfone não encontrado")
             QTimer.singleShot(2500, lambda: self.b_testar.setText("Testar"))
@@ -527,8 +524,7 @@ class PaginaConfig:
 
     def _parar_teste(self):
         if self.teste is not None:
-            self.teste.stop()
-            self.teste.close()
+            audio.fechar_medidor(self.teste)
             self.teste = None
         self.relogio_teste.stop()
         self.medidor.definir(0)
