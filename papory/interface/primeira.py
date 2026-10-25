@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QHBoxLayout, QPl
 
 from .. import audio, config, modelo, plataforma
 from . import tema
+from .calibracao import Calibracao
 from .pag_config import DialogoAtalho, StatusPolimento, _gb, _icone_rotulo
 from .widgets import Medidor, botao, cartao, limpar_layout, rotulo, teclas
 
@@ -148,6 +149,20 @@ class PrimeiraAbertura(QWidget):
         lay.addLayout(vol)
         self.resultado, self.res_lay = cartao("ok", (16, 14, 16, 14), 12, horizontal=True)
         lay.addWidget(self.resultado)
+        caixa_cal, cl = cartao(margens=(16, 14, 16, 14), espaco=6)
+        topo = QHBoxLayout()
+        topo.setSpacing(8)
+        topo.addWidget(_icone_rotulo("microfone", tema.VERDE, 18))
+        topo.addWidget(rotulo("Ensine seu jeito de falar", "h3"))
+        topo.addStretch(1)
+        self.b_calibrar = botao("Começar")
+        self.b_calibrar.clicked.connect(self._calibrar)
+        topo.addWidget(self.b_calibrar)
+        cl.addLayout(topo)
+        self.rot_calibrar = rotulo("Opcional, uns 2 minutos: leia algumas frases e o Papory aprende os nomes que "
+                                   "você mais usa.", "meta", quebra=True)
+        cl.addWidget(self.rot_calibrar)
+        lay.addWidget(caixa_cal)
         lay.addStretch(1)
         botoes = QHBoxLayout()
         voltar, seguir = botao("Voltar"), botao("Continuar", "primario")
@@ -316,6 +331,17 @@ class PrimeiraAbertura(QWidget):
             self.motor.aplicar_config()
             self._ir(2)
         self.motor.pausar(estava)
+
+    def _calibrar(self):
+        d = Calibracao(self, self.cfg, self.motor, lambda: (config.salvar(self.cfg), self.motor.aplicar_config()))
+        d.terminou.connect(self._calibrou)
+        d.exec()
+
+    def _calibrou(self, aprendido):
+        n = len(aprendido["regras"]) + len(aprendido["vocabulario"])
+        self.rot_calibrar.setText(f"Feito. Aprendi {n} {'coisa nova' if n == 1 else 'coisas novas'} sobre o seu "
+                                  "jeito de falar." if n else "Feito. O Papory já entende bem o seu jeito de falar.")
+        self.b_calibrar.setText("Fazer de novo")
 
     def _concluir(self):
         self.motor.entregar = None

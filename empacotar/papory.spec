@@ -11,6 +11,7 @@ ICONE = str(RAIZ / "marca" / "papory.ico")
 DADOS = [
     (str(RAIZ / "papory" / "interface" / "fontes"), "papory/interface/fontes"),
     (str(RAIZ / "papory" / "interface" / "imagens"), "papory/interface/imagens"),
+    (str(RAIZ / "papory" / "palavras_comuns.txt"), "papory"),
     *collect_data_files("onnx_asr"),
     # bibliotecas que perguntam a própria versão ao iniciar (importlib.metadata)
     *copy_metadata("onnx-asr"), *copy_metadata("huggingface_hub"), *copy_metadata("onnxruntime-directml"),

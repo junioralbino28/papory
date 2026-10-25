@@ -84,6 +84,46 @@ for i in range(3):
     for _ in range(4):
         app.processEvents()
     bem_vindo.grab().save(str(saida / f"primeira-{i + 1}.png"))
+    if i == 1:
+        bem_vindo._mostrar_resultado("Testando o Papory, um, dois, três.")
+        for _ in range(4):
+            app.processEvents()
+        bem_vindo.grab().save(str(saida / "primeira-2-ouviu.png"))
+
+from papory.interface.calibracao import Calibracao  # noqa: E402
+
+calib = Calibracao(None, cfg, motor, lambda: None)
+calib.resize(560, 640)
+calib.show()
+
+
+def foto_calib(nome):
+    for _ in range(4):
+        app.processEvents()
+    calib.grab().save(str(saida / f"calibracao-{nome}.png"))
+
+
+foto_calib("1-inicio")
+calib.campo_termos.setText("Lumora, Zaptalk")
+calib._comecar()
+foto_calib("2-frase")
+voz = {"fala": 0.004, "saturado": 0.0}  # baixinha: para fotografar o aviso do microfone
+calib.ao_evento("ouvindo", None)
+errado = "Oi, aqui é o papore, o ditado por voz que roda no meu computador."
+calib.ao_evento("ditado", {"cru": errado, "final": errado, "volume": voz})
+foto_calib("3-diferente")
+calib._mostrar_frase(1)
+calib.ao_evento("ouvindo", None)
+certo = calib.frases[1]["texto"]
+calib.ao_evento("ditado", {"cru": certo, "final": certo, "volume": voz})
+foto_calib("4-certinho")
+calib._mostrar_frase(6)  # "Hoje eu falei sobre Lumora na reunião." ouvida como "uma hora": troca vem desmarcada
+calib.ao_evento("ouvindo", None)
+comum = "Hoje eu falei sobre uma hora na reunião."
+calib.ao_evento("ditado", {"cru": comum, "final": comum, "volume": voz})
+calib._ver_resultado()
+foto_calib("5-resultado")
+calib.done(0)
 
 print("fotos em", saida)
 print("eventos do motor falso:", eventos)

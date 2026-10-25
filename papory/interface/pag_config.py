@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QHBoxLayout, QLineEdit, QMess
 from .. import __version__, audio, config, historico, modelo, plataforma
 from ..teclado import GRUPOS
 from . import tema
+from .calibracao import Calibracao
 from .widgets import (Interruptor, Medidor, botao, cartao, icone, limpar_layout, linha, nome_tecla,
                       pagina_rolavel, rotulo, teclas)
 
@@ -271,6 +272,19 @@ class PaginaConfig:
         l.addLayout(linha_vol)
         v.addWidget(c)
 
+        # ---- calibração
+        c, l = cartao()
+        l.addWidget(rotulo("Seu jeito de falar", "h3"))
+        linha_cal = QHBoxLayout()
+        linha_cal.setSpacing(12)
+        linha_cal.addWidget(rotulo("Leia algumas frases curtas e o Papory aprende os nomes e termos que você mais "
+                                   "usa. Também confere o volume do microfone.", "meta", quebra=True), 1)
+        b_calibrar = botao("Ler as frases", "secundario", "microfone")
+        b_calibrar.clicked.connect(self._calibrar)
+        linha_cal.addWidget(b_calibrar, 0, Qt.AlignmentFlag.AlignVCenter)
+        l.addLayout(linha_cal)
+        v.addWidget(c)
+
         # ---- reconhecimento
         c, l = cartao()
         l.addWidget(rotulo("Reconhecimento de voz", "h3"))
@@ -497,6 +511,13 @@ class PaginaConfig:
     def _trocar_mic(self, _):
         self.janela.cfg["microfone"] = self.mic.currentData()
         self._salvar()
+
+    def _calibrar(self):
+        if self.teste is not None:
+            self._parar_teste()
+        d = Calibracao(self.area, self.janela.cfg, self.janela.motor, self.janela.salvar_config)
+        d.terminou.connect(lambda _: self.janela.vocabulario_mudou())
+        d.exec()
 
     def _testar_mic(self):
         if self.teste is not None or self.janela.motor.gravando:

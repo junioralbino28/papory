@@ -13,7 +13,7 @@ from PySide6.QtWidgets import QApplication
 
 from .. import config, historico, modelo, plataforma
 from ..motor import Motor
-from . import tema
+from . import calibracao, tema
 from .bandeja import Bandeja
 from .janela import Janela
 from .pilula import Pilula
@@ -100,7 +100,7 @@ def rodar(a):
     janela = Janela(cfg, motor)
     pilula = Pilula(cfg, motor)
     bandeja = Bandeja(cfg, motor)
-    for receptor in (pilula.ao_evento, bandeja.ao_evento, janela.ao_evento):
+    for receptor in (pilula.ao_evento, bandeja.ao_evento, janela.ao_evento, calibracao.repassar):
         ponte.evento.connect(receptor)
     ponte.evento.connect(lambda e, d: e == "aviso" and bandeja.avisar(str(d)))
     pilula.pedir_config.connect(lambda: janela.mostrar("config"))

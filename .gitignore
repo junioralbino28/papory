@@ -20,6 +20,8 @@
 /ferramentas/*
 !/ferramentas/foto_interface.py
 !/ferramentas/teste_motor.py
+!/ferramentas/teste_calibracao.py
+!/ferramentas/teste_calibracao_voz.py
 !/ferramentas/gerar_icone.py
 
 # caches e saídas de build

@@ -18,7 +18,7 @@ import traceback
 
 from . import colar, config, contexto, historico, plataforma
 from .asr import Reconhecedor
-from .audio import Gravador, GravadorDeArquivo, atualizar_aparelhos
+from .audio import Gravador, GravadorDeArquivo, atualizar_aparelhos, medir_volume
 from .polimento import Polidor
 from .segunda_opiniao import SegundaOpiniao
 from .teclado import Atalho
@@ -274,7 +274,8 @@ class Motor:
         registro = {"app": ctx["processo"], "titulo": ctx["titulo"], "duracao_s": round(dur, 2), "cru": cru,
                     "segunda_opiniao": outra, "polimento": onde, "trocas": self.polidor.ultimas_trocas,
                     "final": final, "motivo_cru": motivo, "t_asr": round(t_asr, 3), "t_polimento": round(t_pol, 3),
-                    "t_total": round(time.perf_counter() - soltou, 3), "colou": ok, "resultado": resultado}
+                    "t_total": round(time.perf_counter() - soltou, 3), "colou": ok, "resultado": resultado,
+                    "volume": medir_volume(audio, taxa)}
         if self.cfg["historico"] and not self.arquivo_teste and not entregar:
             registro["arquivo"] = str(historico.salvar(audio, taxa, registro))
         self.ultimo = registro

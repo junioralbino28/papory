@@ -88,6 +88,7 @@ Sem o script, a saída é manual. A cada versão nova, abra Monitoramento de Ent
 - Segure `Ctrl + Win` (no Mac, `Control + Command`), fale e solte. Dá para trocar o atalho nas Configurações.
 - Enquanto você fala aparece uma pílula no rodapé da tela, e ela some quando o texto é colado.
 - O Papory fica perto do relógio (no Mac, na barra de menus, lá em cima). O papagaio abre o menu, com microfone, pausa e "copiar o último ditado".
+- Para o Papory aprender o seu jeito de falar, leia as frases de calibração. Elas aparecem na primeira abertura e ficam em Configurações, no cartão "Seu jeito de falar". Antes, escreva os nomes que você mais usa (empresa, clientes, ferramentas). Em uns 2 minutos ele vê o que ouviu errado, cria as trocas automáticas e avisa se o microfone está baixo ou estourando. Troca que mexeria numa palavra comum, como "uma hora", vem desmarcada para você decidir.
 - Se ele errar uma palavra, abra o Papory, ache o ditado no Início e corrija pelo lápis. A palavra vai para o vocabulário, e a mesma correção feita duas vezes vira troca automática.
 - Nos atalhos de texto você cadastra frases curtas que viram textos inteiros. Diga "meu e-mail" e ele escreve o endereço completo.
 
@@ -143,4 +144,4 @@ Com `python -m papory --terminal` ele roda sem interface, mostrando tudo no term
 
 ## Créditos e licença
 
-O reconhecimento usa o [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), da NVIDIA (licença CC-BY-4.0), na versão ONNX do [onnx-asr](https://github.com/istupakov/onnx-asr). As fontes são a Pixelify Sans e a Plus Jakarta Sans, com a licença SIL Open Font em `papory/interface/fontes`. O código do Papory tem licença MIT.
+O reconhecimento usa o [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), da NVIDIA (licença CC-BY-4.0), na versão ONNX do [onnx-asr](https://github.com/istupakov/onnx-asr). As fontes são a Pixelify Sans e a Plus Jakarta Sans, com a licença SIL Open Font em `papory/interface/fontes`. A lista de palavras comuns (`papory/palavras_comuns.txt`) vem do [FrequencyWords](https://github.com/hermitdave/FrequencyWords), de Hermit Dave, feito com legendas do OpenSubtitles, e tem licença CC BY-SA 4.0. O código do Papory tem licença MIT.

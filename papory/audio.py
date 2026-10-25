@@ -95,6 +95,16 @@ def escolher_dispositivo(nome):
     raise ValueError(f"microfone não encontrado: {nome!r}")
 
 
+def medir_volume(audio, taxa):
+    """fala: volume típico da voz (RMS em janelas de 20 ms, 90º percentil); saturado: fração de amostras no teto."""
+    n = max(1, int(taxa * 0.02))
+    if len(audio) < n:
+        return {"fala": 0.0, "saturado": 0.0}
+    janelas = audio[: len(audio) // n * n].reshape(-1, n)
+    return {"fala": round(float(np.percentile(np.sqrt((janelas ** 2).mean(axis=1)), 90)), 4),
+            "saturado": round(float((np.abs(audio) >= 0.98).mean()), 5)}
+
+
 class Gravador:
     def __init__(self, nome_microfone=None):
         self.nome_microfone = nome_microfone
