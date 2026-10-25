@@ -1,0 +1,31 @@
+# Lista do que PODE ir para o GitHub: tudo o mais fica de fora por padrão.
+# Voz, ditados, medições, pesquisa e anotações de quem desenvolve nunca entram.
+/*
+!/.gitignore
+!/.gitattributes
+!/.github/
+!/LICENSE
+!/README.md
+!/requirements.txt
+!/requirements-mac.txt
+!/Papory.pyw
+!/Papory.bat
+!/papory/
+!/marca/
+!/mac/
+!/empacotar/
+
+# ferramentas: só as de uso geral (as de laboratório usam dados pessoais)
+!/ferramentas/
+/ferramentas/*
+!/ferramentas/foto_interface.py
+!/ferramentas/teste_motor.py
+!/ferramentas/gerar_icone.py
+
+# caches e saídas de build
+__pycache__/
+*.pyc
+/empacotar/build/
+/empacotar/dist/
+/empacotar/saida/
+/empacotar/*.log

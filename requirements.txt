@@ -1,0 +1,13 @@
+# Papory (Windows). Placa de vídeo AMD/NVIDIA/Intel via DirectML; sem placa, roda no processador.
+# Versões travadas: são as que foram testadas no instalador.
+onnxruntime-directml==1.24.4
+onnx-asr[hub]==0.12.0
+huggingface_hub==2.3.0   # baixa o modelo de voz na primeira abertura
+hf-xet==1.7.0
+sounddevice==0.5.6
+soundfile==0.14.0
+numpy==2.5.4
+pynput==1.8.2
+pywin32==312
+requests==2.34.2
+PySide6-Essentials==6.12.0   # interface: bandeja, pílula, janela

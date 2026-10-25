@@ -1,0 +1,129 @@
+# Monta o instalador do Windows e os .dmg do Mac e publica na página de versões quando uma tag vX.Y.Z é enviada.
+# Montar aqui (e não no computador de quem desenvolve) garante que nenhum caminho pessoal vá parar nos pacotes.
+name: versao
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Bibliotecas
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller==6.22.3 pyinstaller-hooks-contrib==2026.9
+
+      - name: Versão (da tag)
+        id: versao
+        shell: bash
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || v="$(python -c 'import papory; print(papory.__version__)')"
+          echo "v=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Pacote (PyInstaller)
+        run: pyinstaller empacotar/papory.spec --noconfirm --distpath empacotar/dist --workpath empacotar/build
+
+      - name: Conferir o pacote (abre e carrega todas as bibliotecas, sem baixar o modelo)
+        shell: bash
+        run: |
+          ./empacotar/dist/Papory/papory-terminal.exe --help
+          test -f empacotar/dist/Papory/Papory.exe
+
+      - name: Instalador (Inno Setup)
+        run: |
+          choco install innosetup -y --no-progress
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /Q "/DVersao=${{ steps.versao.outputs.v }}" empacotar\papory.iss
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: empacotar/saida/Papory-Setup-*.exe
+
+  mac:
+    strategy:
+      matrix:
+        include:
+          - runner: macos-15-intel
+            plataforma: x86_64-apple-darwin
+            nome: Intel
+          - runner: macos-14
+            plataforma: aarch64-apple-darwin
+            nome: Apple-Silicon
+    runs-on: ${{ matrix.runner }}
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "12.0"   # só pacotes que rodam no macOS 12 (Monterey) ou mais novo
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: uv e Python 3.12
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Bibliotecas
+        run: |
+          uv venv --python 3.12 .venv
+          uv pip install --python .venv/bin/python --python-platform ${{ matrix.plataforma }} --only-binary :all: \
+            -r requirements-mac.txt pyinstaller==6.22.3 pyinstaller-hooks-contrib==2026.9
+
+      - name: Versão (da tag)
+        id: versao
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || v="$(.venv/bin/python -c 'import papory; print(papory.__version__)')"
+          echo "v=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Pacote (PyInstaller)
+        run: .venv/bin/python -m PyInstaller empacotar/papory-mac.spec --noconfirm --distpath empacotar/dist --workpath empacotar/build
+
+      - name: Conferir o pacote (abre e carrega todas as bibliotecas, sem baixar o modelo)
+        run: |
+          ./empacotar/dist/Papory.app/Contents/MacOS/Papory --help
+          # o README manda rodar o script de assinatura deste caminho
+          test -f empacotar/dist/Papory.app/Contents/Resources/assinar-papory.sh
+          bash -n empacotar/dist/Papory.app/Contents/Resources/assinar-papory.sh
+
+      - name: Imagem de disco (.dmg)
+        run: |
+          mkdir -p empacotar/saida/dmg
+          cp -R empacotar/dist/Papory.app empacotar/saida/dmg/
+          ln -s /Applications empacotar/saida/dmg/Aplicativos
+          hdiutil create -quiet -volname Papory -srcfolder empacotar/saida/dmg -ov -format UDZO \
+            "empacotar/saida/Papory-${{ steps.versao.outputs.v }}-Mac-${{ matrix.nome }}.dmg"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-${{ matrix.nome }}
+          path: empacotar/saida/Papory-*.dmg
+
+  publicar:
+    needs: [windows, mac]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: pacotes
+          merge-multiple: true
+
+      - name: Publicar na página de versões
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" pacotes/* --title "Papory $v" --notes-file empacotar/NOTAS.md
