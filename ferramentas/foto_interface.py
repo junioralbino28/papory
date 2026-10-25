@@ -77,6 +77,15 @@ bandeja.sincronizar()
 bandeja.menu.adjustSize()
 bandeja.menu.grab().save(str(saida / "bandeja-menu.png"))
 
+from papory.interface.aviso_som import AvisoSom  # noqa: E402
+
+aviso = AvisoSom(None, cfg)
+aviso.show()
+for _ in range(4):
+    app.processEvents()
+aviso.grab().save(str(saida / "aviso-som.png"))
+aviso.done(0)  # marca como visto: o passo 2 da primeira abertura não abre o aviso por cima (ele trava a foto)
+
 bem_vindo = PrimeiraAbertura(cfg, motor, lambda: None)
 bem_vindo.show()
 for i in range(3):

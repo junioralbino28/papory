@@ -175,8 +175,8 @@ class Calibracao(QDialog):
         self._atualizar_botoes()
         r = self.leituras[i]
         if r is None:
-            self._cartao("suave", None, "Pronto: segure o atalho e leia a frase." if self.motor.pronto else
-                         "Preparando o reconhecimento… leva alguns segundos.")
+            self._cartao("suave", None, "Pronto: segure o atalho, espere o assobio e leia a frase."
+                         if self.motor.pronto else "Preparando o reconhecimento… leva alguns segundos.")
         else:
             self._mostrar_leitura(r)
 

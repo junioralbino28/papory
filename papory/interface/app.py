@@ -6,14 +6,14 @@ import sys
 import threading
 import traceback
 
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from PySide6.QtWidgets import QApplication
 
 from .. import config, historico, modelo, plataforma
 from ..motor import Motor
-from . import calibracao, tema
+from . import aviso_som, calibracao, tema
 from .bandeja import Bandeja
 from .janela import Janela
 from .pilula import Pilula
@@ -136,6 +136,8 @@ def rodar(a):
         carregar()
         if not a.escondido:
             janela.show()
+        # quem já usava e atualizou: o aviso do assobio aparece uma vez, antes do próximo ditado
+        QTimer.singleShot(800, lambda: aviso_som.mostrar_se_precisa(janela if janela.isVisible() else None, cfg))
 
     faltam = plataforma.pedir_permissoes()  # Mac: abre os pedidos do sistema (no Windows não falta nada)
     if faltam:

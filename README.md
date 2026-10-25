@@ -85,7 +85,8 @@ Sem o script, a saída é manual. A cada versão nova, abra Monitoramento de Ent
 
 ## Usar
 
-- Segure `Ctrl + Win` (no Mac, `Control + Command`), fale e solte. Dá para trocar o atalho nas Configurações.
+- Segure `Ctrl + Win` (no Mac, `Control + Command`), espere o assobio do papagaio, fale e solte. Dá para trocar o atalho nas Configurações.
+- O assobio avisa que o microfone já está ouvindo. Com o microfone do computador ele vem na hora; com fone Bluetooth pode levar uns 2 segundos, o tempo de o fone ligar o microfone. O que você falar antes dele não é gravado.
 - Enquanto você fala aparece uma pílula no rodapé da tela, e ela some quando o texto é colado.
 - O Papory fica perto do relógio (no Mac, na barra de menus, lá em cima). O papagaio abre o menu, com microfone, pausa e "copiar o último ditado".
 - Para o Papory aprender o seu jeito de falar, leia as frases de calibração. Elas aparecem na primeira abertura e ficam em Configurações, no cartão "Seu jeito de falar". Antes, escreva os nomes que você mais usa (empresa, clientes, ferramentas). Em uns 2 minutos ele vê o que ouviu errado, cria as trocas automáticas e avisa se o microfone está baixo ou estourando. Troca que mexeria numa palavra comum, como "uma hora", vem desmarcada para você decidir.

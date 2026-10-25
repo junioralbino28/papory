@@ -298,15 +298,23 @@ def ligar_inicio(sim):
 
 
 # ------------------------------------------------------------- miudezas
-def bipe(freq, ms):
-    """Sons do próprio Mac no lugar dos tons do Windows: agudo = começou, médio = terminou, grave = só copiou."""
-    nome = "Tink" if freq >= 800 else "Pop" if freq >= 600 else "Basso"
+SONS = Path(__file__).resolve().parent.parent / "sons"
+_SONS_DO_MAC = {"comecou": "Tink", "terminou": "Pop", "copiou": "Basso"}  # se o arquivo não abrir
+_carregados = {}
+
+
+def tocar_som(nome):
+    """Assobio do papagaio (comecou, terminou, copiou), sem esperar terminar."""
     try:
-        som = NSSound.soundNamed_(nome)
+        som = _carregados.get(nome)
+        if som is None:
+            som = NSSound.alloc().initWithContentsOfFile_byReference_(str(SONS / f"{nome}.wav"), True)
+            som = som or NSSound.soundNamed_(_SONS_DO_MAC[nome])
+            _carregados[nome] = som  # guardado: o NSSound some se ninguém segurar a referência
         if som is not None:
             som.stop()
             som.play()
-    except Exception:  # noqa: BLE001 — sem saída de som, segue sem bipe
+    except Exception:  # noqa: BLE001 — sem saída de som, segue sem
         pass
 
 

@@ -13,6 +13,7 @@ DADOS = [
     (str(RAIZ / "papory" / "interface" / "fontes"), "papory/interface/fontes"),
     (str(RAIZ / "papory" / "interface" / "imagens"), "papory/interface/imagens"),
     (str(RAIZ / "papory" / "palavras_comuns.txt"), "papory"),
+    (str(RAIZ / "papory" / "sons"), "papory/sons"),
     (str(RAIZ / "mac" / "assinar-papory.sh"), "."),   # vira Papory.app/Contents/Resources/assinar-papory.sh
     *collect_data_files("onnx_asr"),
     # bibliotecas que perguntam a própria versão ao iniciar (importlib.metadata)

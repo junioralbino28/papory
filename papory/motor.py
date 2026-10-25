@@ -24,7 +24,8 @@ from .segunda_opiniao import SegundaOpiniao
 from .teclado import Atalho
 
 
-som = plataforma.bipe
+som = plataforma.tocar_som
+ESPERA_MICROFONE_S = 3.0  # sem som nenhum do microfone nesse tempo, o assobio de começo toca assim mesmo
 
 
 def aplicar_substituicoes(texto, cfg, processo):
@@ -59,6 +60,7 @@ class Motor:
         self.pausado = False
         self.pronto = False
         self.gravando = False
+        self._fala = 0              # conta os apertos: o assobio de começo atrasado não toca numa fala seguinte
         self.entregar = None        # se for uma função, recebe o texto final em vez de colar (teste do microfone)
         self.ultimo = None          # último registro, para "copiar o último ditado"
         self.ultima_restauracao = None
@@ -209,19 +211,27 @@ class Motor:
                     continue
                 estado = {"contexto": ctx}
                 self.gravando = True
+                self._fala += 1
                 if self.cfg["sons"]:
-                    som(880, 40)
+                    threading.Thread(target=self._assobiar_quando_ouvir, args=(self.gravador, self._fala),
+                                     daemon=True).start()
                 self.avisar("ouvindo", ctx["processo"])
             elif ev == "soltou" and estado:
                 audio, taxa = self.gravador.parar()
                 self.gravando = False
                 if self.cfg["sons"]:
-                    som(620, 40)
+                    som("terminou")
                 self._trabalhos.put((audio, taxa, estado["contexto"], time.perf_counter()))
                 self.avisar("escrevendo", None)
                 estado = {}
                 if not self.arquivo_teste:  # relê a lista enquanto o texto é escrito: o próximo ditado já vê fone novo
                     threading.Thread(target=atualizar_aparelhos, daemon=True).start()
+
+    def _assobiar_quando_ouvir(self, gravador, fala):
+        """O assobio de começo quer dizer "pode falar": só toca quando o microfone entrega som de verdade."""
+        gravador.ouviu.wait(ESPERA_MICROFONE_S)
+        if self.gravando and self._fala == fala:  # soltou antes: o assobio de fim já tocou
+            som("comecou")
 
     def _trabalho(self):
         while True:
@@ -262,7 +272,7 @@ class Motor:
             restauracao = colar.colar(final, hwnd=ctx["hwnd"])
             if restauracao == "copiado":  # a janela onde a fala começou sumiu ou não voltou para a frente
                 if self.cfg["sons"]:
-                    som(440, 120)
+                    som("copiou")
                 ok, resultado, restauracao = True, "copiado", None
                 self.avisar("copiado", None)
             else:

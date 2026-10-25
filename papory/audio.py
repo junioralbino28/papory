@@ -112,6 +112,9 @@ class Gravador:
         self._blocos, self._fluxo, self._trava = [], None, threading.Lock()
         self.abriu_em_s = 0.0
         self.nivel = 0.0  # volume do último bloco (RMS), para as barras da pílula
+        # o 1º som de verdade chegou: fone Bluetooth no modo música leva ~1,5 s para ligar o microfone
+        # (medido no Buds2 Pro), e o que se fala antes disso não chega
+        self.ouviu = threading.Event()
 
     def _preparar(self):
         """Acha o microfone pelo nome: o número dele muda quando a lista de aparelhos é relida."""
@@ -128,11 +131,14 @@ class Gravador:
         with self._trava:
             self._blocos.append(dados[:, 0].copy())
         self.nivel = float(np.sqrt(np.mean(dados[:, 0] ** 2))) if len(dados) else 0.0
+        if self.nivel > 0 and not self.ouviu.is_set():
+            self.ouviu.set()
 
     def iniciar(self):
         global _abertos
         t0 = time.perf_counter()
         self._blocos = []
+        self.ouviu.clear()
         with _trava:  # espera uma releitura da lista que esteja no meio (no máximo uns 200 ms)
             self._preparar()
             self._fluxo = sd.InputStream(device=self.dispositivo, samplerate=self.taxa, channels=1,
@@ -166,6 +172,8 @@ class GravadorDeArquivo:
         self.nome = f"arquivo {caminho}"
         self.abriu_em_s = 0.0
         self.nivel = 0.0
+        self.ouviu = threading.Event()
+        self.ouviu.set()
 
     def iniciar(self):
         pass

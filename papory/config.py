@@ -62,6 +62,7 @@ PADRAO = {
     "sons": True,
     "interface": {
         "primeira_abertura_feita": False,
+        "aviso_som_visto": False,       # o aviso "espere o assobio para falar" já apareceu
         "pilula": True,                 # mostra a pílula no rodapé da tela enquanto ouve
         "dicas_fechadas": [],
         "sugestoes_ignoradas": [],      # palavras aprendidas que a pessoa mandou ignorar

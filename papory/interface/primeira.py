@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QHBoxLayout, QPl
                                QStackedWidget, QVBoxLayout, QWidget)
 
 from .. import audio, config, modelo, plataforma
-from . import tema
+from . import aviso_som, tema
 from .calibracao import Calibracao
 from .pag_config import DialogoAtalho, StatusPolimento, _gb, _icone_rotulo
 from .widgets import Medidor, botao, cartao, limpar_layout, rotulo, teclas
@@ -276,6 +276,7 @@ class PrimeiraAbertura(QWidget):
         if i == 1:
             self.motor.entregar = lambda texto: self.ponte.ouviu.emit(texto)
             self._mostrar_resultado(None)
+            QTimer.singleShot(0, lambda: aviso_som.mostrar_se_precisa(self, self.cfg))  # antes do 1º ditado
         else:
             self.motor.entregar = None
         if i == 2:
@@ -284,7 +285,7 @@ class PrimeiraAbertura(QWidget):
     def _mostrar_resultado(self, texto, ok=True):
         limpar_layout(self.res_lay)
         if texto is None:
-            msg = ("Pronto: segure o atalho e leia a frase." if self.motor.pronto else
+            msg = ("Pronto: segure o atalho, espere o assobio e leia a frase." if self.motor.pronto else
                    "Preparando o reconhecimento… leva alguns segundos.")
             self.resultado.setProperty("papel", "suave")
             self.res_lay.addWidget(rotulo(msg, "meta", quebra=True), 1)

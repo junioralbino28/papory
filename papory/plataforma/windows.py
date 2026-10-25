@@ -4,7 +4,6 @@ import os
 import shutil
 import subprocess
 import sys
-import threading
 import time
 import winreg
 import winsound
@@ -270,8 +269,16 @@ def ligar_inicio(sim):
 
 
 # ------------------------------------------------------------- miudezas
-def bipe(freq, ms):
-    threading.Thread(target=winsound.Beep, args=(freq, ms), daemon=True).start()
+SONS = Path(__file__).resolve().parent.parent / "sons"
+
+
+def tocar_som(nome):
+    """Assobio do papagaio (comecou, terminou, copiou), sem esperar terminar. Um som novo corta o anterior."""
+    try:
+        winsound.PlaySound(str(SONS / f"{nome}.wav"),
+                           winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+    except RuntimeError:  # sem saída de som: segue sem
+        pass
 
 
 def abrir(caminho):

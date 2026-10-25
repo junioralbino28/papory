@@ -23,6 +23,7 @@
 !/ferramentas/teste_calibracao.py
 !/ferramentas/teste_calibracao_voz.py
 !/ferramentas/gerar_icone.py
+!/ferramentas/gerar_sons.py
 
 # caches e saídas de build
 __pycache__/

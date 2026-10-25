@@ -371,7 +371,8 @@ class PaginaConfig:
         t = rotulo("Geral", "h3")
         t.setContentsMargins(0, 12, 0, 4)
         l.addWidget(t)
-        itens = [("Bipes ao começar e ao terminar", "Um bipe grave avisa quando o texto ficou só copiado.",
+        itens = [("Sons ao começar e ao terminar", "O assobio avisa que pode falar. Um assobio grave avisa quando o "
+                  "texto ficou só copiado.",
                   cfg["sons"], self._mudar_bipes),
                  ("Mostrar a pílula enquanto ouve", f"Fica no rodapé da tela, {plataforma.ONDE_PILULA}.",
                   cfg["interface"]["pilula"], self._mudar_pilula),
