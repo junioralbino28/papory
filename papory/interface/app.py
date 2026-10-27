@@ -70,6 +70,8 @@ def _redirecionar_log():
 
 def rodar(a):
     _redirecionar_log()
+    if getattr(sys, "papory_esperas", 0):  # ver Papory.pyw
+        print(f"abertura: esperou {sys.papory_esperas * 0.5:.1f} s o Windows liberar as DLLs da instalação nova")
     try:  # identidade própria na barra de tarefas: sem isso o Windows mostra o ícone do Python (pythonw.exe)
         plataforma.identidade_app()
     except Exception:  # noqa: BLE001
