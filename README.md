@@ -31,7 +31,7 @@ Na minha voz, lendo um roteiro com frases simples e difíceis, o erro de palavra
 
 ### No Windows
 
-1. Baixe o `Papory-Setup.exe` na [página de versões](https://github.com/junioralbino28/papory/releases/latest) e instale.
+1. Baixe o `Papory-Setup-<versão>.exe` (por exemplo, `Papory-Setup-0.1.6.exe`) na [página de versões](https://github.com/junioralbino28/papory/releases/latest) e instale.
 2. Abra o Papory. Na primeira vez ele baixa o modelo de voz (cerca de 2,5 GB, uma vez só), testa o seu microfone e mostra o atalho. Depois disso funciona sem internet.
 
 O Windows pode mostrar o aviso "O Windows protegeu o computador", porque o instalador não tem assinatura digital paga. Clique em "Mais informações" e depois em "Executar assim mesmo".
@@ -142,6 +142,17 @@ python3.12 -m venv .venv
 ```
 
 Com `python -m papory --terminal` ele roda sem interface, mostrando tudo no terminal.
+
+## Gostou? Ajude o Papory
+
+O Papory é feito por uma pessoa só, e o retorno de quem usa é o que mais faz ele melhorar.
+
+- **Deixe uma estrela** no alto desta página. É o que faz outras pessoas acharem o Papory.
+- **Deu algum erro?** [Conte o que aconteceu](https://github.com/junioralbino28/papory/issues/new?template=erro.yml). Pelo app é mais fácil: em Configurações, no cartão "Ajude o Papory", o botão "Relatar um erro" já preenche a versão e o sistema.
+- **Tem uma ideia?** [Mande a sugestão](https://github.com/junioralbino28/papory/issues/new?template=sugestao.yml).
+- **Usa um assistente de IA (Claude, Codex, Cursor)?** Ele pode ler o `AGENTS.md` deste repositório para te ajudar a instalar, resolver problemas e escrever o relato de um erro. O envio continua sendo seu.
+
+Para enviar um relato é preciso ter conta no GitHub, que é grátis.
 
 ## Créditos e licença
 

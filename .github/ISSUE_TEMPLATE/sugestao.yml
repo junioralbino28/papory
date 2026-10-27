@@ -1,0 +1,21 @@
+name: Sugestão
+description: Uma ideia para melhorar o Papory.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: ideia
+    attributes:
+      label: A ideia
+      description: O que você gostaria que o Papory fizesse, ou fizesse diferente.
+    validations:
+      required: true
+  - type: textarea
+    id: por-que
+    attributes:
+      label: Para que serve
+      description: Em que situação isso ajudaria você.
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do Papory
+      placeholder: "0.1.6"

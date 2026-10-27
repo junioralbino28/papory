@@ -1,8 +1,11 @@
 """Tela Configurações: atalho, microfone, reconhecimento, polimento local, reforço na nuvem e geral."""
 import json
+import platform
+import sys
 import threading
 import webbrowser
 from pathlib import Path
+from urllib.parse import quote, urlencode
 
 import requests
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
@@ -17,6 +20,16 @@ from .widgets import (Interruptor, Medidor, botao, cartao, icone, limpar_layout,
 
 OLLAMA = "http://127.0.0.1:11434"
 ORDEM_TECLAS = ["ctrl", "win", "shift", "alt", "alt_gr", *[f"f{n}" for n in range(1, 13)]]
+REPO = "https://github.com/junioralbino28/papory"
+
+
+def _link_issue(modelo):
+    """Formulário do GitHub já com a versão e o sistema. Nunca o nome do microfone: o do fone leva o nome do dono."""
+    sistema = f"macOS {platform.mac_ver()[0]}" if sys.platform == "darwin" else f"Windows {platform.release()}"
+    campos = {"template": f"{modelo}.yml", "versao": __version__}
+    if modelo == "erro":
+        campos["sistema"] = sistema
+    return f"{REPO}/issues/new?{urlencode(campos, quote_via=quote)}"
 
 
 def _gb(n):
@@ -400,6 +413,24 @@ class PaginaConfig:
         botoes.addWidget(apagar)
         botoes.addStretch(1)
         l.addLayout(botoes)
+        v.addWidget(c)
+
+        # ---- ajude o Papory
+        c, l = cartao()
+        l.addWidget(rotulo("Ajude o Papory", "h3"))
+        l.addWidget(rotulo("O Papory é feito por uma pessoa só. Uma estrela no GitHub ajuda outras pessoas a acharem, "
+                           "e o seu retorno é o que mais faz ele melhorar. Para mandar erro ou sugestão, é preciso "
+                           "entrar na sua conta do GitHub (é grátis).", "meta", quebra=True))
+        linha_ajuda = QHBoxLayout()
+        linha_ajuda.setSpacing(10)
+        ajuda = (("Dar uma estrela", "brilho", REPO), ("Relatar um erro", "alerta", _link_issue("erro")),
+                 ("Mandar sugestão", "mais", _link_issue("sugestao")))
+        for texto, nome_icone, link in ajuda:
+            b = botao(texto, "secundario", nome_icone)
+            b.clicked.connect(lambda _=False, u=link: webbrowser.open(u))
+            linha_ajuda.addWidget(b)
+        linha_ajuda.addStretch(1)
+        l.addLayout(linha_ajuda)
         v.addWidget(c)
 
         rod = QHBoxLayout()

@@ -1,0 +1,44 @@
+name: Relatar um erro
+description: Algo no Papory não funcionou como devia.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por avisar. Dica: em **Configurações > Ajude o Papory > Relatar um erro**, o app abre este formulário com a versão e o sistema já preenchidos.
+
+        Não coloque nada pessoal: nome, e-mail, chave da Groq, caminho de pasta com o seu nome de usuário. E não anexe áudios da pasta `historico`: é a sua voz.
+  - type: textarea
+    id: o-que-aconteceu
+    attributes:
+      label: O que aconteceu
+      description: O que você fez, o que esperava e o que saiu. Se o texto saiu errado, cole o que você falou e o que apareceu.
+    validations:
+      required: true
+  - type: textarea
+    id: como-repetir
+    attributes:
+      label: Como repetir
+      description: Em que programa você estava ditando, se a fala foi longa ou curta, se acontece sempre ou de vez em quando.
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do Papory
+      description: Aparece no fim das Configurações.
+      placeholder: "0.1.6"
+  - type: input
+    id: sistema
+    attributes:
+      label: Sistema
+      placeholder: Windows 11, macOS 14...
+  - type: input
+    id: microfone
+    attributes:
+      label: Tipo de microfone
+      description: Só o tipo, sem o nome do aparelho (fone Bluetooth costuma levar o nome do dono).
+      placeholder: fone Bluetooth, microfone do notebook, webcam, microfone USB...
+  - type: textarea
+    id: mais
+    attributes:
+      label: Mais alguma coisa
+      description: Print, vídeo curto ou o final do arquivo papory.log (troque o seu nome de usuário por ...).
