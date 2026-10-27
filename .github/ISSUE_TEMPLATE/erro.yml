@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Obrigado por avisar. Dica: em **Configurações > Ajude o Papory > Relatar um erro**, o app abre este formulário com a versão e o sistema já preenchidos.
+        Obrigado por avisar. Dica: na lateral esquerda do app, em **Gostou do Papory? > Relatar um erro**, este formulário abre com a versão e o sistema já preenchidos.
 
         Não coloque nada pessoal: nome, e-mail, chave da Groq, caminho de pasta com o seu nome de usuário. E não anexe áudios da pasta `historico`: é a sua voz.
   - type: textarea

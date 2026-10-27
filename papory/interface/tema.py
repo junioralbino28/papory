@@ -62,6 +62,11 @@ QPushButton[papel="nav"] {{
 }}
 QPushButton[papel="nav"]:hover {{ background: #E3EDD9; }}
 QPushButton[papel="nav"]:checked {{ background: {VERDE_MENU}; color: #17410C; font-weight: 700; }}
+QPushButton[papel="nav_ajuda"] {{
+    text-align: left; padding: 0 12px; min-height: 34px; border: 0; border-radius: 8px;
+    background: transparent; color: {TEXTO_2}; font-size: 13px; font-weight: 600;
+}}
+QPushButton[papel="nav_ajuda"]:hover {{ background: #E3EDD9; color: #17410C; }}
 
 QFrame[papel="cartao"] {{ background: {BRANCO}; border: 1px solid {BORDA}; border-radius: 16px; }}
 QFrame[papel="cartao_destaque"] {{ background: {BRANCO}; border: 2px solid #9CCB82; border-radius: 16px; }}

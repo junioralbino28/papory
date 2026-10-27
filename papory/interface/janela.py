@@ -1,4 +1,6 @@
 """Janela principal: menu lateral (Início, Vocabulário, Atalhos de texto, Configurações) + estado do Papory."""
+import webbrowser
+
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QButtonGroup, QFrame, QHBoxLayout, QMainWindow, QPushButton, QStackedWidget,
@@ -7,13 +9,14 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QHBoxLayout, QMainWindow, Q
 from .. import config
 from . import tema
 from .pag_atalhos import PaginaAtalhos
-from .pag_config import PaginaConfig
+from .pag_config import REPO, PaginaConfig, link_issue
 from .pag_inicio import PaginaInicio
 from .pag_vocabulario import PaginaVocabulario
 from .widgets import cartao, icone, limpar_layout, linha, rotulo, teclas
 
 PAGINAS = [("inicio", "Início", "inicio"), ("vocabulario", "Vocabulário", "vocabulario"),
            ("atalhos", "Atalhos de texto", "atalhos"), ("config", "Configurações", "config")]
+ALTURA_COM_AJUDA = 700  # abaixo disso o "Gostou do Papory?" some da lateral (abre com 800)
 ESTADOS = {"pronto": ("Pronto para ouvir", tema.VERDE_VIVO), "carregando": ("Carregando a voz…", "#C9A227"),
            "pausado": ("Pausado", "#8A9580"), "atencao": ("Precisa de atenção", "#D92D20")}
 
@@ -71,6 +74,26 @@ class Janela(QMainWindow):
         mv.addLayout(nav)
         mv.addStretch(1)
 
+        self.ajuda = QWidget()  # sempre à vista: estrela, erro e sugestão no GitHub
+        ajuda = QVBoxLayout(self.ajuda)
+        ajuda.setContentsMargins(0, 0, 0, 0)
+        ajuda.setSpacing(2)
+        titulo = rotulo("Gostou do Papory?", "pequeno")
+        titulo.setContentsMargins(12, 0, 0, 4)
+        ajuda.addWidget(titulo)
+        atalhos = (("Dar uma estrela", "brilho", REPO), ("Relatar um erro", "alerta", link_issue("erro")),
+                   ("Mandar sugestão", "mais", link_issue("sugestao")))
+        for texto, nome_icone, link in atalhos:
+            b = QPushButton(texto)
+            b.setProperty("papel", "nav_ajuda")
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            b.setIcon(icone(nome_icone, tema.TEXTO_2, 16))
+            b.setIconSize(QSize(16, 16))
+            b.setToolTip("Abre no navegador")
+            b.clicked.connect(lambda _=False, u=link: webbrowser.open(u))
+            ajuda.addWidget(b)
+        mv.addWidget(self.ajuda)
+
         self.status, self.status_lay = cartao(margens=(16, 16, 16, 16), espaco=10)
         mv.addWidget(self.status)
         h.addWidget(menu)
@@ -89,6 +112,11 @@ class Janela(QMainWindow):
         self.ja_fechou = False
         self.ir("inicio")
         self.atualizar_status()
+
+    def resizeEvent(self, ev):
+        super().resizeEvent(ev)
+        if hasattr(self, "ajuda"):  # janela baixa: o cartão de estado não pode apertar
+            self.ajuda.setVisible(self.height() >= ALTURA_COM_AJUDA)
 
     # ------------------------------------------------------------ navegação
     def ir(self, chave):

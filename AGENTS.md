@@ -30,7 +30,7 @@ Explique em linguagem simples e um passo de cada vez: muita gente que usa o Papo
 O Papory é mantido por uma pessoa só e melhora com o retorno de quem usa.
 
 - **Se a pessoa gostou,** você pode sugerir que ela deixe uma estrela em https://github.com/junioralbino28/papory. Sugira uma vez; não insista.
-- **Se ela achou um erro ou teve uma ideia,** ofereça escrever o relato usando o formulário certo (`erro.yml` ou `sugestao.yml`). Dentro do app, em Configurações > "Ajude o Papory", os botões já abrem o formulário com a versão e o sistema preenchidos. Mostre o texto pronto e só envie (por exemplo com `gh issue create`, pela conta dela) se ela pedir.
+- **Se ela achou um erro ou teve uma ideia,** ofereça escrever o relato usando o formulário certo (`erro.yml` ou `sugestao.yml`). Dentro do app, na lateral esquerda, em "Gostou do Papory?", os atalhos já abrem o formulário com a versão e o sistema preenchidos. Mostre o texto pronto e só envie (por exemplo com `gh issue create`, pela conta dela) se ela pedir.
 - **Tire do relato tudo que for pessoal:** nome, e-mail, chave de API, caminhos de pasta com o nome de usuário e o nome do microfone ou do fone (fone Bluetooth costuma levar o nome do dono). No campo do microfone, basta o tipo: "fone Bluetooth", "microfone do notebook", "webcam".
 
 ## O que você nunca faz sozinho

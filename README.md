@@ -148,7 +148,7 @@ Com `python -m papory --terminal` ele roda sem interface, mostrando tudo no term
 O Papory é feito por uma pessoa só, e o retorno de quem usa é o que mais faz ele melhorar.
 
 - **Deixe uma estrela** no alto desta página. É o que faz outras pessoas acharem o Papory.
-- **Deu algum erro?** [Conte o que aconteceu](https://github.com/junioralbino28/papory/issues/new?template=erro.yml). Pelo app é mais fácil: em Configurações, no cartão "Ajude o Papory", o botão "Relatar um erro" já preenche a versão e o sistema.
+- **Deu algum erro?** [Conte o que aconteceu](https://github.com/junioralbino28/papory/issues/new?template=erro.yml). Pelo app é mais fácil: na lateral esquerda, em "Gostou do Papory?", o "Relatar um erro" já preenche a versão e o sistema.
 - **Tem uma ideia?** [Mande a sugestão](https://github.com/junioralbino28/papory/issues/new?template=sugestao.yml).
 - **Usa um assistente de IA (Claude, Codex, Cursor)?** Ele pode ler o `AGENTS.md` deste repositório para te ajudar a instalar, resolver problemas e escrever o relato de um erro. O envio continua sendo seu.
 
