@@ -100,8 +100,12 @@ def instalar(caminho):
     trocados); o instalador reabre o Papory no fim. Mac: abre o .dmg para a pessoa arrastar o app."""
     if sys.platform == "win32":
         separado = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+        # o Papory que o instalador reabre herda este ambiente: sem as variáveis de teste e com o aviso do
+        # PyInstaller de que é um programa novo, não um filho deste
+        ambiente = {k: v for k, v in os.environ.items() if not k.upper().startswith(("PAPORY_", "_PYI_"))}
+        ambiente["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
         subprocess.Popen([str(caminho), "/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CLOSEAPPLICATIONS"],
-                         creationflags=separado, close_fds=True, cwd=str(PASTA))
+                         creationflags=separado, close_fds=True, cwd=str(PASTA), env=ambiente)
     else:
         from . import plataforma
         plataforma.abrir(caminho)
