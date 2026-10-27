@@ -31,7 +31,7 @@ Na minha voz, lendo um roteiro com frases simples e difíceis, o erro de palavra
 
 ### No Windows
 
-1. Baixe o `Papory-Setup-<versão>.exe` (por exemplo, `Papory-Setup-0.1.6.exe`) na [página de versões](https://github.com/junioralbino28/papory/releases/latest) e instale.
+1. Baixe o `Papory-Setup-<versão>.exe` (por exemplo, `Papory-Setup-0.1.8.exe`) na [página de versões](https://github.com/junioralbino28/papory/releases/latest) e instale.
 2. Abra o Papory. Na primeira vez ele baixa o modelo de voz (cerca de 2,5 GB, uma vez só), testa o seu microfone e mostra o atalho. Depois disso funciona sem internet.
 
 O Windows pode mostrar o aviso "O Windows protegeu o computador", porque o instalador não tem assinatura digital paga. Clique em "Mais informações" e depois em "Executar assim mesmo".
@@ -83,6 +83,15 @@ Se você usa o Claude Code ou outra IA no terminal, peça a ela: "siga o guia do
 
 Sem o script, a saída é manual. A cada versão nova, abra Monitoramento de Entrada e Acessibilidade, selecione o Papory, clique no "−" para tirar da lista, abra o Papory de novo e libere outra vez.
 
+### Atualizar
+
+Desde a versão 0.1.8 o Papory avisa sozinho quando sai uma versão nova. Aparece um cartão na lateral da janela e um aviso perto do relógio.
+
+- No Windows, clique em Atualizar. Ele baixa, confere se o arquivo é igual ao publicado, instala e abre de novo, sem mais nada da sua parte.
+- No Mac, ele baixa o `.dmg` certo para o seu Mac e abre. Arraste o Papory para Aplicativos de novo e, se você usa o script de assinatura, rode o comando outra vez.
+
+Ele nunca atualiza sem o seu clique nem no meio de um ditado. Quem tem uma versão mais antiga que a 0.1.8 instala a próxima à mão, como da primeira vez.
+
 ## Usar
 
 - Segure `Ctrl + Win` (no Mac, `Control + Command`), espere o assobio do papagaio, fale e solte. Dá para trocar o atalho nas Configurações.
@@ -108,7 +117,9 @@ A chave fica guardada no Gerenciador de Credenciais do Windows (no Mac, no Acess
 
 ## Privacidade
 
-Com os dois reforços desligados, nada sai do seu computador. O histórico (áudio e texto de cada ditado) fica em `%APPDATA%\Papory\historico` (no Mac, em `~/Library/Application Support/Papory/historico`), e dá para desligar ou apagar tudo nas Configurações.
+Com os dois reforços desligados, nenhum ditado sai do seu computador. O histórico (áudio e texto de cada ditado) fica em `%APPDATA%\Papory\historico` (no Mac, em `~/Library/Application Support/Papory/historico`), e dá para desligar ou apagar tudo nas Configurações.
+
+Para saber se há versão nova, o Papory pergunta ao GitHub qual é a mais recente, ao abrir e a cada 6 horas. A pergunta leva só o número da versão que você usa, nada de ditado nem de configuração, e o GitHub vê o seu endereço de internet como em qualquer site. Dá para desligar em Configurações, "Procurar atualizações".
 
 O Papory escuta o teclado só para saber quando você aperta o atalho. Alguns antivírus estranham isso, e o código inteiro está aqui para quem quiser conferir.
 

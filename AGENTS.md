@@ -14,6 +14,7 @@ O Papory é um app de ditado por voz em português para Windows e Mac. A pessoa 
 - **Mac (macOS 12 ou mais novo):** rode `uname -m` no Terminal. Se responder `arm64`, é o `.dmg` "Mac-Apple-Silicon"; se responder `x86_64`, é o "Mac-Intel".
 - **Mac, depois de instalar:** o app não tem assinatura paga da Apple. A primeira abertura e as três permissões (Microfone, Monitoramento de Entrada e Acessibilidade) estão no README. Para as permissões não se perderem a cada versão nova, siga `mac/ASSINAR-COM-IA.md`.
 - **Na primeira abertura** o Papory baixa o modelo de voz (cerca de 2,5 GB). Depois funciona sem internet.
+- **Atualizar:** desde a 0.1.8 o próprio app avisa quando há versão nova (cartão na lateral e aviso na bandeja). No Windows, o botão Atualizar baixa, confere o SHA-256, instala e reabre. No Mac, ele baixa o `.dmg` certo e abre; a pessoa arrasta para Aplicativos e, se usa a assinatura, roda o script de novo. Versões mais antigas que a 0.1.8 se atualizam instalando à mão.
 
 **Problemas comuns.**
 

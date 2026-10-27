@@ -392,7 +392,9 @@ class PaginaConfig:
                  (f"Iniciar com o {plataforma.NOME}", plataforma.ICONE_FICA, plataforma.inicio_ligado(),
                   self._mudar_iniciar),
                  ("Guardar o histórico", "Áudio e texto de cada ditado, só neste computador.", cfg["historico"],
-                  self._mudar_historico)]
+                  self._mudar_historico),
+                 ("Procurar atualizações", "Ao abrir e a cada 6 horas pergunta ao GitHub se há versão nova. Não "
+                  "manda nada seu.", cfg["atualizacoes"], self._mudar_atualizacoes)]
         self.sw_geral = []
         for i, (titulo, desc, valor, acao) in enumerate(itens):
             if i:
@@ -481,7 +483,8 @@ class PaginaConfig:
         for sw, valor in ((self.sw_polimento, cfg["polimento"]["ativo"]),
                           (self.sw_reforco, cfg["reforco_nuvem"]["ativo"]),
                           (self.sw_geral[0], cfg["sons"]), (self.sw_geral[1], cfg["interface"]["pilula"]),
-                          (self.sw_geral[2], plataforma.inicio_ligado()), (self.sw_geral[3], cfg["historico"])):
+                          (self.sw_geral[2], plataforma.inicio_ligado()), (self.sw_geral[3], cfg["historico"]),
+                          (self.sw_geral[4], cfg["atualizacoes"])):
             sw.blockSignals(True)
             sw.setChecked(bool(valor))
             sw.blockSignals(False)
@@ -589,6 +592,10 @@ class PaginaConfig:
 
     def _mudar_bipes(self, v):
         self.janela.cfg["sons"] = v
+        self._salvar()
+
+    def _mudar_atualizacoes(self, v):
+        self.janela.cfg["atualizacoes"] = v
         self._salvar()
 
     def _mudar_pilula(self, v):

@@ -11,9 +11,10 @@ from PySide6.QtGui import QIcon
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from PySide6.QtWidgets import QApplication
 
-from .. import config, historico, modelo, plataforma
+from .. import atualizacao, config, historico, modelo, plataforma
 from ..motor import Motor
 from . import aviso_som, calibracao, tema
+from .atualizar import Atualizador
 from .bandeja import Bandeja
 from .janela import Janela
 from .pilula import Pilula
@@ -116,6 +117,50 @@ def rodar(a):
         janela.mostrar("inicio")
 
     servidor.newConnection.connect(ler_pedido)
+
+    # ---- atualização: aviso na lateral e na bandeja; instala só com o clique e nunca no meio de um ditado
+    atualizador = Atualizador(cfg)
+    ocupado, avisadas = {"agora": False}, set()
+
+    def marcar_ditado(evento, _dados):
+        if evento in ("ouvindo", "escrevendo"):
+            ocupado["agora"] = True
+        elif evento in ("ditado", "silencio", "erro", "sem_microfone"):
+            ocupado["agora"] = False
+
+    def achou(nova):
+        atualizador.nova = nova
+        janela.cartao_atualizacao.mostrar(nova)
+        if nova["versao"] not in avisadas:
+            avisadas.add(nova["versao"])
+            bandeja.avisar(f"Versão {nova['versao']} do Papory disponível. Abra o Papory para atualizar.")
+        if a.atualizar_agora:
+            atualizador.baixar()
+
+    def instalar(resultado):
+        cartao = janela.cartao_atualizacao
+        if isinstance(resultado, Exception):
+            cartao.erro("o arquivo veio diferente do publicado" if isinstance(resultado, ValueError) else
+                        "confira a internet")
+            return
+        if motor.gravando or ocupado["agora"]:
+            cartao.esperando_ditado()
+            QTimer.singleShot(1000, lambda: instalar(resultado))
+            return
+        cartao.instalando()
+        if atualizacao.instalar(resultado):
+            QTimer.singleShot(800, app.quit)  # o instalador troca os arquivos e abre o Papory de novo
+        else:
+            cartao.mac_pronto()
+
+    ponte.evento.connect(marcar_ditado)
+    atualizador.achou.connect(achou)
+    atualizador.progresso.connect(janela.cartao_atualizacao.baixando)
+    atualizador.baixou.connect(instalar)
+    janela.cartao_atualizacao.pediu.connect(atualizador.baixar)
+    atualizador.iniciar()
+    if a.atualizar_agora:
+        atualizador.procurar()
 
     def carregar():
         threading.Thread(target=motor.carregar, daemon=True, name="carga").start()

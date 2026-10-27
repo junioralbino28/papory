@@ -95,6 +95,8 @@ def main():
     ap.add_argument("--escondido", action="store_true", help="abre só o ícone (ao iniciar com o sistema)")
     ap.add_argument("--primeira-abertura", action="store_true", help="mostra a primeira abertura de novo")
     ap.add_argument("--sem-motor", action="store_true", help="só a interface, sem carregar a voz (para testes)")
+    ap.add_argument("--atualizar-agora", action="store_true",
+                    help="procura versão nova e, se houver, baixa e instala na hora (para testes)")
     a = ap.parse_args()
     if a.terminal or a.arquivo_teste or a.uma_vez:
         return terminal(a)

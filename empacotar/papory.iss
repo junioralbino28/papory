@@ -51,6 +51,8 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 
 [Run]
 Filename: "{app}\Papory.exe"; Description: "Abrir o Papory agora"; Flags: nowait postinstall skipifsilent
+; instalação silenciosa = atualização feita pelo próprio Papory: ele fechou para trocar os arquivos, então reabre
+Filename: "{app}\Papory.exe"; Flags: nowait skipifnotsilent
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"

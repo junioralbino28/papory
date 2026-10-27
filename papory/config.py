@@ -59,6 +59,7 @@ PADRAO = {
     ],
     "atalhos_de_texto": {},             # "meu email" -> "fulano@exemplo.com"
     "historico": True,                  # guarda áudio e textos de cada ditado na pasta historico
+    "atualizacoes": True,               # pergunta ao GitHub se há versão nova (ao abrir e a cada 6 horas)
     "sons": True,
     "interface": {
         "primeira_abertura_feita": False,

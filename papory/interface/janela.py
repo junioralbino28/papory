@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QHBoxLayout, QMainWindow, Q
 
 from .. import config
 from . import tema
+from .atualizar import CartaoAtualizacao
 from .pag_atalhos import PaginaAtalhos
 from .pag_config import REPO, PaginaConfig, link_issue
 from .pag_inicio import PaginaInicio
@@ -16,7 +17,6 @@ from .widgets import cartao, icone, limpar_layout, linha, rotulo, teclas
 
 PAGINAS = [("inicio", "Início", "inicio"), ("vocabulario", "Vocabulário", "vocabulario"),
            ("atalhos", "Atalhos de texto", "atalhos"), ("config", "Configurações", "config")]
-ALTURA_COM_AJUDA = 700  # abaixo disso o "Gostou do Papory?" some da lateral (abre com 800)
 ESTADOS = {"pronto": ("Pronto para ouvir", tema.VERDE_VIVO), "carregando": ("Carregando a voz…", "#C9A227"),
            "pausado": ("Pausado", "#8A9580"), "atencao": ("Precisa de atenção", "#D92D20")}
 
@@ -39,7 +39,7 @@ class Janela(QMainWindow):
         h.setContentsMargins(0, 0, 0, 0)
         h.setSpacing(0)
 
-        menu = QFrame()
+        self.menu = menu = QFrame()
         menu.setObjectName("menu")
         menu.setFixedWidth(248)
         mv = QVBoxLayout(menu)
@@ -72,6 +72,10 @@ class Janela(QMainWindow):
             self.botoes[chave] = b
             nav.addWidget(b)
         mv.addLayout(nav)
+        self.cartao_atualizacao = CartaoAtualizacao()  # só aparece quando há versão nova
+        # mede no próximo giro: logo depois de trocar o texto, a altura que o Qt informa ainda é a antiga
+        self.cartao_atualizacao.mudou.connect(lambda: QTimer.singleShot(0, self._ajustar_lateral))
+        mv.addWidget(self.cartao_atualizacao)
         mv.addStretch(1)
 
         self.ajuda = QWidget()  # sempre à vista: estrela, erro e sugestão no GitHub
@@ -115,8 +119,31 @@ class Janela(QMainWindow):
 
     def resizeEvent(self, ev):
         super().resizeEvent(ev)
-        if hasattr(self, "ajuda"):  # janela baixa: o cartão de estado não pode apertar
-            self.ajuda.setVisible(self.height() >= ALTURA_COM_AJUDA)
+        self._ajustar_lateral()
+
+    def _ajustar_lateral(self):
+        """Janela baixa: o cartão de estado não pode apertar. Sai primeiro o "Gostou do Papory?" (o aviso de
+        versão nova passa na frente dele) e depois a explicação do aviso; o botão Atualizar fica sempre."""
+        if not hasattr(self, "ajuda"):
+            return
+        lay, c = self.menu.layout(), self.cartao_atualizacao
+
+        def cabe():
+            precisa = lay.totalHeightForWidth(self.menu.width()) if lay.hasHeightForWidth() else -1
+            # folga de 8 px: a conta do Qt para o texto que quebra em duas linhas sai um pouco curta
+            return (precisa if precisa > 0 else lay.totalSizeHint().height()) + 8 <= self.menu.height()
+
+        lay.setSpacing(28)
+        c.compactar(False)
+        self.ajuda.show()
+        if cabe():
+            return
+        self.ajuda.hide()
+        if c.isHidden() or cabe():
+            return
+        c.compactar(True)
+        if not cabe():  # perto da altura mínima: aproxima os blocos
+            lay.setSpacing(8)
 
     # ------------------------------------------------------------ navegação
     def ir(self, chave):
