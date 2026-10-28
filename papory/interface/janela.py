@@ -119,7 +119,9 @@ class Janela(QMainWindow):
 
     def resizeEvent(self, ev):
         super().resizeEvent(ev)
-        self._ajustar_lateral()
+        # no próximo giro: na 1ª vez que a janela aparece, a lateral ainda não tem a altura final aqui (o
+        # "Gostou do Papory?" ficava escondido na 0.1.8 e 0.1.9 até alguém redimensionar a janela)
+        QTimer.singleShot(0, self._ajustar_lateral)
 
     def _ajustar_lateral(self):
         """Janela baixa: o cartão de estado não pode apertar. Sai primeiro o "Gostou do Papory?" (o aviso de

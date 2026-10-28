@@ -31,7 +31,7 @@ Na minha voz, lendo um roteiro com frases simples e difíceis, o erro de palavra
 
 ### No Windows
 
-1. Baixe o `Papory-Setup-<versão>.exe` (por exemplo, `Papory-Setup-0.1.9.exe`) na [página de versões](https://github.com/junioralbino28/papory/releases/latest) e instale.
+1. Baixe o `Papory-Setup-<versão>.exe` (por exemplo, `Papory-Setup-0.1.10.exe`) na [página de versões](https://github.com/junioralbino28/papory/releases/latest) e instale.
 2. Abra o Papory. Na primeira vez ele baixa o modelo de voz (cerca de 2,5 GB, uma vez só), testa o seu microfone e mostra o atalho. Depois disso funciona sem internet.
 
 O Windows pode mostrar o aviso "O Windows protegeu o computador", porque o instalador não tem assinatura digital paga. Clique em "Mais informações" e depois em "Executar assim mesmo".
