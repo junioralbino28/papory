@@ -107,6 +107,8 @@ def rodar(a):
         ponte.evento.connect(receptor)
     ponte.evento.connect(lambda e, d: e == "aviso" and bandeja.avisar(str(d)))
     pilula.pedir_config.connect(lambda: janela.mostrar("config"))
+    pilula.pedir_pausa.connect(motor.pausar)
+    pilula.pedir_sair.connect(app.quit)
     bandeja.abrir.connect(janela.mostrar)
     bandeja.config_mudou.connect(janela.config_mudou_fora)
     bandeja.sair.connect(app.quit)

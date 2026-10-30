@@ -7,7 +7,7 @@ import math
 import time
 from collections import deque
 
-from PySide6.QtCore import QRect, QRectF, Qt, QTimer, Signal
+from PySide6.QtCore import QPointF, QRect, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QCursor, QFont, QFontMetrics, QGuiApplication, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QWidget
 
@@ -17,6 +17,7 @@ from .widgets import icone
 
 MARGEM = 14          # espaço em volta da pílula para a sombra
 ALTURA = 48
+LARGURA_CONTROLES = 64
 
 # estado: (ícone, cor do círculo, cor do ícone, borda, quanto tempo fica na tela em ms)
 MENSAGENS = {
@@ -31,6 +32,8 @@ MENSAGENS = {
 
 class Pilula(QWidget):
     pedir_config = Signal()
+    pedir_pausa = Signal(bool)
+    pedir_sair = Signal()
 
     def __init__(self, cfg, motor):
         flags = (Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint
@@ -65,14 +68,24 @@ class Pilula(QWidget):
                 "sem_microfone": "Sem microfone", "erro": "Algo deu errado"}[evento]
             self._mostrar(evento, texto)
             self.sumir.start(MENSAGENS[evento][4])
+        elif evento == "pausado":
+            self.update()
 
     def _largura(self, estado, texto):
         fm = QFontMetrics(self.fonte)
         if estado == "ouvindo":
-            return 7 + 34 + 12 + 67 + 12 + fm.horizontalAdvance("0:00") + 16
+            return 7 + 34 + 12 + 67 + 12 + fm.horizontalAdvance("0:00") + 16 + LARGURA_CONTROLES
         if estado == "escrevendo":
-            return 7 + 34 + 12 + 31 + 12 + QFontMetrics(self.fonte_leve).horizontalAdvance(texto) + 18
+            return (7 + 34 + 12 + 31 + 12 + QFontMetrics(self.fonte_leve).horizontalAdvance(texto) + 18
+                    + LARGURA_CONTROLES)
         return 8 + 32 + 10 + fm.horizontalAdvance(texto) + 18
+
+    def _retangulos_controle(self):
+        caixa = QRectF(MARGEM, MARGEM, self.width() - 2 * MARGEM, ALTURA)
+        tamanho = 28
+        sair = QRectF(caixa.right() - tamanho - 5, caixa.center().y() - tamanho / 2, tamanho, tamanho)
+        pausa = QRectF(sair.left() - tamanho - 2, sair.y(), tamanho, tamanho)
+        return pausa, sair
 
     def _mostrar(self, estado, texto):
         self.sumir.stop()
@@ -112,9 +125,47 @@ class Pilula(QWidget):
         self.update()
 
     def mousePressEvent(self, ev):
+        if self.estado in ("ouvindo", "escrevendo") and ev.button() == Qt.MouseButton.LeftButton:
+            pausa, sair = self._retangulos_controle()
+            if sair.contains(ev.position()):
+                self.pedir_sair.emit()
+                ev.accept()
+                return
+            if pausa.contains(ev.position()):
+                self.pedir_pausa.emit(not bool(self.motor.pausado))
+                ev.accept()
+                return
         if self.estado in ("sem_microfone", "erro"):
             self.pedir_config.emit()
             self._esconder()
+
+    def _desenhar_controles(self, p, caixa):
+        pausa, sair = self._retangulos_controle()
+        cor = QColor("#DDE6D4")
+        separador = QColor(cor)
+        separador.setAlpha(45)
+        p.setPen(QPen(separador, 1))
+        p.drawLine(QPointF(pausa.left() - 4, caixa.y() + 11), QPointF(pausa.left() - 4, caixa.bottom() - 11))
+
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(cor)
+        if self.motor.pausado:
+            caminho = QPainterPath()
+            caminho.moveTo(pausa.center().x() - 4, pausa.center().y() - 7)
+            caminho.lineTo(pausa.center().x() + 7, pausa.center().y())
+            caminho.lineTo(pausa.center().x() - 4, pausa.center().y() + 7)
+            caminho.closeSubpath()
+            p.drawPath(caminho)
+        else:
+            p.drawRoundedRect(QRectF(pausa.center().x() - 6, pausa.center().y() - 7, 4, 14), 2, 2)
+            p.drawRoundedRect(QRectF(pausa.center().x() + 2, pausa.center().y() - 7, 4, 14), 2, 2)
+
+        p.setPen(QPen(cor, 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        d = 5
+        p.drawLine(QPointF(sair.center().x() - d, sair.center().y() - d),
+                   QPointF(sair.center().x() + d, sair.center().y() + d))
+        p.drawLine(QPointF(sair.center().x() + d, sair.center().y() - d),
+                   QPointF(sair.center().x() - d, sair.center().y() + d))
 
     # ------------------------------------------------------------- desenho
     def paintEvent(self, _):
@@ -168,6 +219,7 @@ class Pilula(QWidget):
                 p.setFont(self.fonte_leve)
                 p.setPen(QColor("#DDE6D4"))
                 p.drawText(QRectF(x, caixa.y(), 200, ALTURA), Qt.AlignmentFlag.AlignVCenter, self.texto)
+            self._desenhar_controles(p, caixa)
             return
 
         nome, cor_circulo, cor_icone, _, _ = MENSAGENS[self.estado]
