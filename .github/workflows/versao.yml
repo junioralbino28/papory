@@ -59,7 +59,7 @@ jobs:
           - runner: macos-15-intel
             plataforma: x86_64-apple-darwin
             nome: Intel
-          - runner: macos-14
+          - runner: macos-15
             plataforma: aarch64-apple-darwin
             nome: Apple-Silicon
     runs-on: ${{ matrix.runner }}
