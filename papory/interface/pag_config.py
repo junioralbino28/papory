@@ -50,6 +50,15 @@ class _Ponte(QObject):
     resultado = Signal(str, object)
 
 
+class _ListaMicrofones(QComboBox):
+    """Relê os aparelhos ao abrir: um fone ligado com a página aberta aparece sem precisar sair dela."""
+    abrindo = Signal()
+
+    def showPopup(self):
+        self.abrindo.emit()
+        super().showPopup()
+
+
 class StatusPolimento(QWidget):
     """Mostra se o polimento local está pronto e oferece o próximo passo (instalar, abrir, baixar)."""
     mudou = Signal()
@@ -269,14 +278,23 @@ class PaginaConfig:
         l.addWidget(rotulo("Usar", "rotulo"))
         linha_mic = QHBoxLayout()
         linha_mic.setSpacing(12)
-        self.mic = QComboBox()
+        self.mic = _ListaMicrofones()
         self.mic.setAccessibleName("Microfone")
         self.mic.activated.connect(self._trocar_mic)
+        self.mic.abrindo.connect(self._preencher_mic)
         linha_mic.addWidget(self.mic, 1)
+        self.b_procurar = botao("Procurar", "secundario", "buscar")
+        self.b_procurar.setToolTip("Procura de novo os microfones e fones ligados neste computador")
+        self.b_procurar.clicked.connect(self._procurar_mic)
+        linha_mic.addWidget(self.b_procurar)
         self.b_testar = botao("Testar", "secundario", "microfone")
         self.b_testar.clicked.connect(self._testar_mic)
         linha_mic.addWidget(self.b_testar)
         l.addLayout(linha_mic)
+        self.aviso_mic = rotulo("", "pequeno", quebra=True)  # resultado do Procurar
+        self.aviso_mic.hide()
+        self.esconde_aviso_mic = QTimer(self.aviso_mic, singleShot=True, interval=10000, timeout=self.aviso_mic.hide)
+        l.addWidget(self.aviso_mic)
         linha_vol = QHBoxLayout()
         linha_vol.setSpacing(12)
         linha_vol.addWidget(rotulo("Volume", "meta"))
@@ -462,13 +480,7 @@ class PaginaConfig:
         limpar_layout(self.caixa_teclas)
         self.caixa_teclas.addWidget(teclas(cfg["atalho"], grande=True))
 
-        self.mic.clear()
-        padrao = audio.microfone_padrao()
-        self.mic.addItem(f"Padrão do {plataforma.NOME}{f' ({padrao})' if padrao else ''}", None)
-        for nome in audio.listar_microfones():
-            self.mic.addItem(nome, nome)
-        i = self.mic.findData(cfg["microfone"])
-        self.mic.setCurrentIndex(i if i >= 0 else 0)
+        self._preencher_mic()
 
         self.onde.setCurrentIndex(max(0, self.onde.findData(cfg["asr"]["dispositivo"])))
         limpar_layout(self.status_voz)
@@ -524,6 +536,42 @@ class PaginaConfig:
             self.janela.cfg["atalho"] = list(d.combinacao)
             self._salvar()
         motor.pausar(estava)
+
+    def _preencher_mic(self):
+        """Monta a lista de microfones (relê os aparelhos, no máximo uma vez a cada 2 s). Devolve os nomes."""
+        padrao = audio.microfone_padrao()
+        nomes = audio.listar_microfones()
+        self.mic.clear()
+        self.mic.addItem(f"Padrão do {plataforma.NOME}{f' ({padrao})' if padrao else ''}", None)
+        for nome in nomes:
+            self.mic.addItem(nome, nome)
+        i = self.mic.findData(self.janela.cfg["microfone"])
+        self.mic.setCurrentIndex(i if i >= 0 else 0)
+        return nomes
+
+    def _procurar_mic(self):
+        if self.teste is not None:
+            self._parar_teste()  # com o microfone aberto no teste, o sistema não deixa reler a lista
+        antes = {self.mic.itemData(i) for i in range(1, self.mic.count())}
+        if not audio.atualizar_aparelhos(minimo_s=0):
+            self._avisar_mic("Agora não deu para procurar: termine o ditado e clique em Procurar de novo.")
+            return
+        depois = self._preencher_mic()
+        novos = [n for n in depois if n not in antes]
+        escolhido = self.janela.cfg["microfone"]
+        if novos:
+            texto = f"Apareceu: {', '.join(novos)}."
+        else:
+            texto = f"Nada novo: {len(depois)} microfone{'s' if len(depois) != 1 else ''} na lista."
+        if escolhido and self.mic.findData(escolhido) < 0:
+            texto += (f" O que você escolheu ({escolhido}) não está ligado: confira se o fone está conectado no "
+                      f"Bluetooth do {plataforma.NOME} e procure de novo.")
+        self._avisar_mic(texto)
+
+    def _avisar_mic(self, texto):
+        self.aviso_mic.setText(texto)
+        self.aviso_mic.show()
+        self.esconde_aviso_mic.start()
 
     def _trocar_mic(self, _):
         self.janela.cfg["microfone"] = self.mic.currentData()
