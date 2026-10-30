@@ -22,7 +22,7 @@ def confere(nome, obtido, esperado):
     print(f"{'ok ' if ok else 'ERRO'} {nome}: {obtido!r}" + ("" if ok else f"  (esperava {esperado!r})"))
 
 
-confere("0.1.10 > 0.1.9", at.versao_tupla("v0.1.10") > at.versao_tupla("0.1.9"), True)
+confere("0.1.11 > 0.1.10", at.versao_tupla("v0.1.11") > at.versao_tupla("0.1.10"), True)
 confere("igual não é mais nova", at.versao_tupla("v0.1.7") > at.versao_tupla("0.1.7"), False)
 nomes = ["Papory-0.1.7-Mac-Apple-Silicon.dmg", "Papory-0.1.7-Mac-Intel.dmg", "Papory-Setup-0.1.7.exe"]
 if sys.platform == "win32":
